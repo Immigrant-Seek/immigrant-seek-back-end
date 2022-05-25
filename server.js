@@ -125,6 +125,39 @@ app.get('/lawyers', async(req, res) => {
     }
 })
 
+// api route to get all clients information
+app.get('/users', async(req, res) => {
+    try{
+        const databaseResult = await pool.query("SELECT user_id, first_name, last_name, email FROM users WHERE is_lawyer = false")
+        console.log(databaseResult)
+        res.json({
+            data: databaseResult.rows
+        });
+    } catch(err){
+        res.statusCode = 500;
+        res.json({
+            message: `WHOOPS! ${err.message}`
+        })
+    }
+})
+
+// api route to get a specific client's information
+app.get('/user/:id', async(req, res) => {
+    const userId = req.params.id
+    try{
+        const sql = `SELECT user_id, first_name, last_name, email FROM users WHERE user_id = $1`
+        const databaseResult = await pool.query(sql, [userId])
+        res.json({
+            data: databaseResult.rows
+        });
+    } catch(err){
+        res.statusCode = 500;
+        res.json({
+            message: `WHOOPS! ${err.message}`
+        })
+    }
+})
+
 // api route to get all reviews
 app.get('/allReviews', async(req, res) => {
     try {
@@ -194,12 +227,12 @@ app.get('/review/:id/user', async(req, res) => {
 // api route to edit user first name
 app.patch('/users/firstName/:id', async(req, res) => {
     const userId = req.params.id
-    const firstName = req.body.firstName
+    const firstName = req.body.first_name
     try {
         const sql = `UPDATE users SET first_name = $2 WHERE user_id = $1`
         const databaseResult = await pool.query(sql, [userId, firstName])
         res.status(200).json({
-            databaseResult
+           databaseResult
         })
     } catch (err) {
         res.statusCode = 500;
@@ -212,7 +245,7 @@ app.patch('/users/firstName/:id', async(req, res) => {
 // api route to edit user last name
 app.patch('/users/lastName/:id', async(req, res) => {
     const userId = req.params.id
-    const lastName = req.body.lastName
+    const lastName = req.body.last_name
     try {
         const sql = `UPDATE users SET last_name = $2 WHERE user_id = $1`
         const databaseResult = await pool.query(sql, [userId, lastName])
